@@ -1,0 +1,46 @@
+.tools/
+.dart_tool/
+.flutter-plugins-dependencies
+build/
+*.iml
+.idea/
+.vscode/
+android/local.properties
+android/.gradle/
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+windows/flutter/ephemeral/
+*.log
+node_modules/
+.session/
+__pycache__/
+*.pyc
+android/app/src/main/assets/gateway.zip
+android/app/src/main/assets/gateway.sha256
+
+# Private sessions, credentials and local signing material never belong in Git.
+.env
+.env.*
+!.env.example
+*.enc
+*.dpapi
+key.local
+*.jks
+*.keystore
+key.properties
+android/key.properties
+*.apk
+*.aab
+*.exe
+*.dll
+*.so
+*.zip
+# QA screenshots can contain account avatars, comments or personal notes.
+docs/*.png
+docs/*.jpg
+docs/*.jpeg
+# Local machine work history is retained locally, not published.
+docs/WORKLOG.md
+docs/PUBLISH_AUDIT.json

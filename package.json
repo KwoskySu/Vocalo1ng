@@ -1,0 +1,15 @@
+{
+  "name": "vocashelf-gateway",
+  "version": "0.4.9",
+  "license": "GPL-3.0-or-later",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.mjs",
+    "test": "node --test server/*.test.mjs"
+  },
+  "dependencies": {
+    "@neteasecloudmusicapienhanced/api": "4.41.1",
+    "dashjs": "4.7.4"
+  }
+}

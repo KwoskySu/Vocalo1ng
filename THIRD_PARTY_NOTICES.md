@@ -1,0 +1,19 @@
+# Third-party notices
+
+Copyright (C) 2026 Vocalo1ng contributors. Original project code is licensed under GPL-3.0-or-later. Dependencies retain their own licenses.
+
+| Component | Source and notices |
+| --- | --- |
+| Flutter / Dart packages | Pinned in pubspec.lock; package metadata and in-app license page |
+| Node.js Mobile 18.20.4 | https://github.com/nodejs-mobile/nodejs-mobile ; assets/licenses/Nodejs-Mobile-LICENSE.txt |
+| NetEaseCloudMusicApiEnhanced | https://github.com/neteasecloudmusicapienhanced/api ; upstream package license |
+| dash.js 4.7.4 | https://github.com/Dash-Industry-Forum/dash.js ; BSD-3-Clause |
+| QQMusicApi Python 0.8.2 | https://github.com/luren-dc/QQMusicApi ; GPL-3.0, assets/licenses/GPL-3.0.txt |
+| media_kit / mpv / FFmpeg | https://github.com/media-kit/media-kit ; package and bundled library licenses and sources |
+| Noto Sans SC | https://github.com/google/fonts/tree/main/ofl/notosanssc ; SIL OFL 1.1, assets/fonts/OFL.txt |
+| Noto Serif SC | https://github.com/google/fonts/tree/main/ofl/notoserifsc ; SIL OFL 1.1, assets/fonts/NotoSerifSC-OFL.txt |
+| ZCOOL KuaiLe | https://github.com/google/fonts/tree/main/ofl/zcoolkuaile ; SIL OFL 1.1, assets/fonts/ZCOOLKuaiLe-OFL.txt |
+
+Songs, videos, lyrics, comments and artwork belong to their rights holders and are not licensed by this repository. VocaWiki attribution and history links are preserved; images and quotations may have separate licenses.
+
+Redistributors must preserve required dependency notices and comply with the licenses of bundled components. Credentials, account snapshots, local libraries and private QA screenshots are excluded from this source release.
