@@ -27,7 +27,7 @@ import 'widgets/about.dart';
 import 'services/app_info.dart';
 import 'services/collections.dart';
 import 'widgets/collections.dart';
-import 'widgets/other_collections.dart';
+import 'widgets/birthday_calendar.dart';
 import 'widgets/comments.dart';
 import 'widgets/brand_mark.dart';
 import 'widgets/now_playing.dart';
@@ -487,7 +487,7 @@ class _ShelfHomeState extends State<ShelfHome> {
                                       (0, Icons.explore_outlined, '发现'),
                                       (1, Icons.favorite_outline, '收藏'),
                                       (2, Icons.menu_book_outlined, '百科'),
-                                      (3, Icons.bookmarks_outlined, '其他收藏'),
+                                      (3, Icons.cake_outlined, '生日日历'),
                                       (4, Icons.tune_rounded, '设置'),
                                     ])
                                       IconButton(
@@ -526,7 +526,10 @@ class _ShelfHomeState extends State<ShelfHome> {
                                               const WikiExplorer()
                                             else
                                               const SizedBox.shrink(),
-                                            OtherCollectionsPage(music: music),
+                                            if (visitedPages.contains(3))
+                                              BirthdayCalendar(music: music)
+                                            else
+                                              const SizedBox.shrink(),
                                             _settings(),
                                           ],
                                         ),
@@ -593,8 +596,8 @@ class _ShelfHomeState extends State<ShelfHome> {
                           label: '百科',
                         ),
                         NavigationDestination(
-                          icon: Icon(Icons.bookmarks_outlined),
-                          label: '其他收藏',
+                          icon: Icon(Icons.cake_outlined),
+                          label: '生日',
                         ),
                         NavigationDestination(
                           icon: Icon(Icons.tune_rounded),
@@ -680,7 +683,7 @@ class _ShelfHomeState extends State<ShelfHome> {
           (0, Icons.explore_outlined, '发现音乐'),
           (1, Icons.favorite_outline, '我的收藏'),
           (2, Icons.menu_book_outlined, 'VOCALOID百科'),
-          (3, Icons.bookmarks_outlined, '其他收藏'),
+          (3, Icons.cake_outlined, '生日日历'),
           (4, Icons.tune_rounded, '偏好与数据'),
         ])
           Padding(
@@ -758,7 +761,7 @@ class _ShelfHomeState extends State<ShelfHome> {
         if (!desktop) ...[const BrandMark(size: 25), const SizedBox(width: 8)],
         Expanded(
           child: Text(
-            ['发现音乐', '我的收藏', 'VOCALOID百科', '其他收藏', '偏好与数据'][page],
+            ['发现音乐', '我的收藏', 'VOCALOID百科', '生日日历', '偏好与数据'][page],
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),

@@ -37,7 +37,8 @@ class PlaybackNotification(private val service: Service) {
     private val progressTick = object : Runnable {
         override fun run() {
             if (!closed && state?.getBooleanExtra("playing", false) == true) {
-                if(Build.VERSION.SDK_INT < 29) render() else refreshProgress()
+                // Keep the visible progress card current as well as MediaSession.
+                render()
                 handler.postDelayed(this, 1000)
             }
         }
@@ -66,7 +67,12 @@ class PlaybackNotification(private val service: Service) {
         addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
     }, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     fun update(intent: Intent) {
-        state = intent
+        val incoming = Intent(intent)
+        val previous = state
+        if (previous != null && previous.getStringExtra("mediaId") == incoming.getStringExtra("mediaId") && incoming.getLongExtra("duration", 0) <= 0) {
+            incoming.putExtra("duration", previous.getLongExtra("duration", 0))
+        }
+        state = incoming
         updatedAt = SystemClock.elapsedRealtime()
         handler.removeCallbacks(progressTick)
         if (intent.getBooleanExtra("playing", false) && !intent.getBooleanExtra("buffering",false)) handler.postDelayed(progressTick, 1000)
@@ -133,11 +139,11 @@ class PlaybackNotification(private val service: Service) {
         val legacy = Build.VERSION.SDK_INT < 29
         // SystemUI rebuilds styled RemoteViews. Plain MediaStyle discards a
         // custom progress panel during that rebuild; DecoratedMedia preserves it.
-        val style = if(legacy) Notification.DecoratedMediaCustomViewStyle() else Notification.MediaStyle()
+        val style = Notification.DecoratedMediaCustomViewStyle()
         style.setMediaSession(session.sessionToken)
         if(legacy) style.setShowActionsInCompactView(1,2,3) else style.setShowActionsInCompactView(0,1,2)
         builder.setProgress(1000,progress,false).setShowWhen(false)
-        if(Build.VERSION.SDK_INT < 29) {
+        run {
             val views=RemoteViews(service.packageName,R.layout.playback_notification)
             views.setTextViewText(R.id.track_title,title)
             views.setTextViewText(R.id.track_artist,artist)
@@ -146,13 +152,22 @@ class PlaybackNotification(private val service: Service) {
             views.setProgressBar(R.id.track_progress,1000,progress,false)
             if(compactCover!=null) views.setImageViewBitmap(R.id.track_cover,compactCover) else views.setImageViewResource(R.id.track_cover,R.mipmap.ic_launcher)
             builder.setCustomBigContentView(views)
+            val compact = RemoteViews(service.packageName, R.layout.playback_notification_compact)
+            compact.setTextViewText(R.id.track_title, title)
+            compact.setTextViewText(R.id.track_artist, artist)
+            compact.setTextViewText(R.id.track_position, "${time(position)} / ${time(duration)}")
+            compact.setProgressBar(R.id.track_progress, 1000, progress, false)
+            if(compactCover != null) compact.setImageViewBitmap(R.id.track_cover, compactCover)
+            else compact.setImageViewResource(R.id.track_cover, R.mipmap.ic_launcher)
+            builder.setCustomContentView(compact)
         }
         builder.setColor(accent)
-        if(Build.VERSION.SDK_INT>=26) builder.setColorized(Build.VERSION.SDK_INT>=29)
+        if(Build.VERSION.SDK_INT>=26) builder.setColorized(false)
         // Legacy MediaStyle turns largeIcon into a huge decorative right panel.
         // Our own thumbnail remains in the progress panel; lockscreen/session
         // album art is kept separately in MediaMetadata above.
-        if(!legacy) builder.setLargeIcon(cover)
+        // Session metadata retains artwork. A template largeIcon reserves an
+        // extra column which can squeeze custom progress on vendor templates.
         if(legacy) builder.addAction(Notification.Action.Builder(R.drawable.notification_back,"后退10秒",control("seek:${(position-10000).coerceAtLeast(0)}")).build())
         builder.setContentTitle(title).setContentText(artist)
             .setSubText(if(count>0) "当前列表 · 第 ${index+1}/$count 首" else "Vocalo1ng")

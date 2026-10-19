@@ -83,7 +83,7 @@ void main() {
           Icons.explore_outlined,
           Icons.favorite_outline,
           Icons.menu_book_outlined,
-          Icons.bookmarks_outlined,
+          Icons.cake_outlined,
           Icons.tune_rounded,
         ]) {
           final nav = find.byType(NavigationBar);

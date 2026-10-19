@@ -21,3 +21,25 @@ async function update() {
   finally {setTimeout(update,400);}
 }
 update();
+
+// Interactive controls are opt-in, so OBS captures remain free of handles.
+if (new URLSearchParams(location.search).get('interactive') === '1') {
+  document.body.classList.add('interactive');
+  const button = document.querySelector('#tools');
+  let locked = false, drag = null;
+  const key = 'vocalo1ng.live.layout.v1';
+  try { const old=JSON.parse(localStorage.getItem(key)); if(old) {
+    widget.style.width=Math.min(innerWidth,Math.max(220,old.width))+'px';
+    widget.style.height=Math.min(innerHeight,Math.max(100,old.height))+'px';
+    widget.style.left=Math.max(0,Math.min(innerWidth-100,old.left))+'px';
+    widget.style.top=Math.max(0,Math.min(innerHeight-60,old.top))+'px';
+  }} catch {}
+  const save=()=>{const r=widget.getBoundingClientRect();try{localStorage.setItem(key,JSON.stringify({width:r.width,height:r.height,left:r.left,top:r.top}));}catch{}};
+  button.onclick=()=>{locked=!locked;document.body.classList.toggle('locked',locked);button.textContent=locked?'解锁拖动缩放':'锁定位置';};
+  widget.addEventListener('pointerdown',e=>{const r=widget.getBoundingClientRect();if(locked||e.button!==0||(e.clientX>r.right-24&&e.clientY>r.bottom-24))return;
+    drag={x:e.clientX-r.left,y:e.clientY-r.top};widget.setPointerCapture(e.pointerId);e.preventDefault();});
+  widget.addEventListener('pointermove',e=>{if(!drag)return;widget.style.left=Math.max(0,Math.min(innerWidth-widget.offsetWidth,e.clientX-drag.x))+'px';widget.style.top=Math.max(0,Math.min(innerHeight-widget.offsetHeight,e.clientY-drag.y))+'px';});
+  const stop=()=>{drag=null;save();};widget.addEventListener('pointerup',stop);widget.addEventListener('pointercancel',stop);
+  if(typeof ResizeObserver!=='undefined')new ResizeObserver(save).observe(widget);
+  addEventListener('resize',()=>{const r=widget.getBoundingClientRect();widget.style.left=Math.max(0,Math.min(innerWidth-widget.offsetWidth,r.left))+'px';widget.style.top=Math.max(0,Math.min(innerHeight-widget.offsetHeight,r.top))+'px';});
+}

@@ -20,6 +20,8 @@ import { wikiSourceImage } from './wiki_image.mjs';
 import {windowsWikiImage, wikiApi} from './wiki_transport.mjs';
 import { community } from './community.mjs';
 import { LiveStore } from './live.mjs';
+import { AnniversarySource } from './anniversaries.mjs';
+const anniversarySource = new AnniversarySource();
 import { songQualities } from './qualities.mjs';
 import {resolveSession} from './sessions.mjs';
 const liveStore = new LiveStore();
@@ -129,6 +131,10 @@ async function pipeResponse(upstream, res, kind) {
 
 async function api(req, res, url) {
   const route = url.pathname;
+  if (route === '/api/anniversaries') {
+    try { return send(res, await anniversarySource.query(url.searchParams.get('date'))); }
+    catch (error) { return send(res, {error: error.message || '纪念查询暂时失败'}, /有效月日/.test(error.message) ? 400 : 502); }
+  }
   if (route === '/api/live/state') return send(res, liveStore.read(url.searchParams.get('token')));
   const stateless = ['/api/image','/api/wiki','/api/health','/api/pv/playback','/api/pv/manifest','/api/pv/stream'].includes(route)
     || (route === '/api/pv/danmaku' && url.searchParams.has('token'));
@@ -169,7 +175,7 @@ async function api(req, res, url) {
     res.setHeader('Content-Disposition',`attachment; filename="${id}.${String(data.type).toLowerCase() === 'flac' ? 'flac' : 'mp3'}"`);
     return pipeResponse(await fetchSafe(data.url,{},'audio'),res,'audio');
   }
-  if (route === '/api/health') return send(res, { ok: true, version: '0.4.9', provider: 'personal', lan: bindHost === '0.0.0.0' });
+  if (route === '/api/health') return send(res, { ok: true, version: '0.4.10', provider: 'personal', lan: bindHost === '0.0.0.0' });
   if (session) session.bilibili ??= {};
   if (route === '/api/session' && req.method === 'GET') return send(res, { profile: session.profile, bilibili: session.bilibili.profile ?? null, qq: session.qq.profile ?? null });
   if (route.startsWith('/api/qq/')) {

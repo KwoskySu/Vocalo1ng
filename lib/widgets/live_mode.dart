@@ -6,8 +6,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/playback.dart';
 import '../services/live_feed.dart';
 import 'song_detail.dart';
+import 'desktop_mode.dart';
 
-const liveModes = ['歌曲信息卡', '透明双语字幕', '聚焦三行 · 渐隐', '电台信息条', '旋转唱片'];
+const liveModes = [
+  '歌曲信息卡',
+  '透明双语字幕',
+  '聚焦三行 · 渐隐',
+  '电台信息条',
+  '旋转唱片',
+  '纵向海报',
+  '描边聚光',
+  '黑白切片',
+  '霓虹边界',
+  '透明磁带',
+  '磨砂玻璃',
+  '极简进度',
+];
 Future<void> showLiveMode(BuildContext context, Playback playback) =>
     showDialog<void>(
       context: context,
@@ -53,7 +67,7 @@ class _LiveModeState extends State<LiveMode> {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
     setState(() {
-      mode = (prefs.getInt('live.mode') ?? 0).clamp(0, 4);
+      mode = (prefs.getInt('live.mode') ?? 0).clamp(0, liveModes.length - 1);
       size = (prefs.getDouble('live.size') ?? 32).clamp(18, 64);
       opacity = (prefs.getDouble('live.opacity') ?? 0).clamp(0, 1);
       hide = prefs.getBool('live.hide') ?? false;
@@ -155,16 +169,28 @@ class _LiveModeState extends State<LiveMode> {
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: const Color(0xff181b25),
-                borderRadius: BorderRadius.circular(18),
-                gradient: const LinearGradient(
-                  colors: [Color(0xff222631), Color(0xff11141d)],
+                border: mode >= 6
+                    ? Border.all(
+                        color: colors[color].withValues(alpha: .6),
+                        width: mode == 8 ? 3 : 1,
+                      )
+                    : null,
+                borderRadius: BorderRadius.circular(
+                  mode == 7 || mode == 11 ? 2 : 18,
+                ),
+                gradient: LinearGradient(
+                  colors: mode == 7
+                      ? [Colors.black, const Color(0xff333333)]
+                      : mode == 8
+                      ? [const Color(0xff201735), const Color(0xff103137)]
+                      : [const Color(0xff222631), const Color(0xff11141d)],
                 ),
               ),
               child: Opacity(
                 opacity: hide && !widget.playback.player.state.playing ? 0 : 1,
                 child: Row(
                   children: [
-                    if (mode == 0 || mode == 4) ...[
+                    if ([0, 4, 5, 9, 10].contains(mode)) ...[
                       ClipRRect(
                         borderRadius: BorderRadius.circular(
                           mode == 4 ? 100 : 14,
@@ -243,6 +269,15 @@ class _LiveModeState extends State<LiveMode> {
                               style: TextStyle(
                                 fontSize: size,
                                 fontWeight: FontWeight.w800,
+                                shadows: mode == 6 || mode == 8
+                                    ? [
+                                        Shadow(
+                                          color: colors[color],
+                                          blurRadius: mode == 8 ? 16 : 4,
+                                        ),
+                                      ]
+                                    : null,
+                                letterSpacing: mode == 7 ? 3 : null,
                                 height: 1.5,
                               ),
                             ),
@@ -389,6 +424,12 @@ class _LiveModeState extends State<LiveMode> {
                 setState(() {});
               },
             ),
+            if (desktopModeSupported)
+              OutlinedButton.icon(
+                onPressed: () => showDesktopMode(context, widget.playback),
+                icon: const Icon(Icons.desktop_windows_outlined),
+                label: const Text('桌面模式 · 透明穿透展示'),
+              ),
             if (error != null) Text(error!),
             if (url != null) SelectableText(url!),
             Wrap(
@@ -411,9 +452,12 @@ class _LiveModeState extends State<LiveMode> {
                 OutlinedButton.icon(
                   onPressed: url == null
                       ? null
-                      : () => openSource(context, Uri.parse(url!)),
+                      : () => openSource(
+                          context,
+                          Uri.parse('$url&interactive=1'),
+                        ),
                   icon: const Icon(Icons.open_in_new),
-                  label: const Text('打开独立展示窗口'),
+                  label: const Text('打开可拖动缩放窗口'),
                 ),
               ],
             ),

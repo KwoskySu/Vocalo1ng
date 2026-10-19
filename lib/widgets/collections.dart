@@ -4,6 +4,7 @@ import '../models/music.dart';
 import '../services/collections.dart';
 import '../services/playback.dart';
 import 'brand_mark.dart';
+import 'other_collections.dart';
 
 Future<String?> createCollectionFolder(BuildContext context) async {
   final input = TextEditingController();
@@ -141,14 +142,43 @@ class CollectionActions extends StatelessWidget {
   );
 }
 
-class CollectionsPage extends StatefulWidget {
+class CollectionsPage extends StatelessWidget {
   const CollectionsPage({super.key, required this.playback});
   final Playback? playback;
   @override
-  State<CollectionsPage> createState() => _CollectionsPageState();
+  Widget build(BuildContext context) => DefaultTabController(
+    length: 3,
+    child: Column(
+      children: [
+        const TabBar(
+          tabs: [
+            Tab(text: '歌曲收藏'),
+            Tab(text: '百科'),
+            Tab(text: '评论收藏'),
+          ],
+        ),
+        Expanded(
+          child: TabBarView(
+            children: [
+              SongCollectionsPage(playback: playback),
+              const SavedWikiList(),
+              const SavedCommentList(),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
-class _CollectionsPageState extends State<CollectionsPage> {
+class SongCollectionsPage extends StatefulWidget {
+  const SongCollectionsPage({super.key, required this.playback});
+  final Playback? playback;
+  @override
+  State<SongCollectionsPage> createState() => _CollectionsPageState();
+}
+
+class _CollectionsPageState extends State<SongCollectionsPage> {
   String? folder;
   bool likes = false;
   @override

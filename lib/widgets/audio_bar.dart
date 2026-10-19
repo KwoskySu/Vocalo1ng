@@ -1,5 +1,6 @@
 import 'phone_theme.dart';
 import 'package:file_selector/file_selector.dart';
+import 'desktop_mode.dart';
 import 'package:flutter/material.dart';
 import '../models/music.dart';
 import '../services/playback.dart';
@@ -242,6 +243,12 @@ class AudioBar extends StatelessWidget {
             onPressed: () => showLiveMode(context, playback),
             icon: const Icon(Icons.sensors),
           ),
+          if (desktopModeSupported)
+            IconButton(
+              tooltip: '桌面模式',
+              onPressed: () => showDesktopMode(context, playback),
+              icon: const Icon(Icons.desktop_windows_outlined),
+            ),
           if (t != null && v.contains('歌词'))
             IconButton(
               tooltip: '歌词',

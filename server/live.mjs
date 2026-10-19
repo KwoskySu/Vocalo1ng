@@ -16,7 +16,7 @@ export class LiveStore {
     item.state = {title: text('title'), artist: text('artist'), cover: /^https:\/\//.test(cover) ? cover : '',
       line: text('line'), translation: text('translation'), next: text('next'), previous: text('previous'),
       playing: input.playing === true, position: Math.max(0, Number(input.position) || 0), duration: Math.max(0, Number(input.duration) || 0),
-      mode: Math.max(0, Math.min(4, Number(input.mode) || 0)), size: Math.max(18, Math.min(64, Number(input.size) || 32)),
+      mode: Math.max(0, Math.min(11, Number(input.mode) || 0)), size: Math.max(18, Math.min(64, Number(input.size) || 32)),
       opacity: Math.max(0, Math.min(1, Number(input.opacity) || 0)), hide: input.hide === true,
       align: ['left','center','right'].includes(input.align) ? input.align : 'center',
       color: /^#[a-f\d]{6}$/i.test(input.color) ? input.color : '#ffffff',

@@ -17,3 +17,6 @@ Copyright (C) 2026 Vocalo1ng contributors. Original project code is licensed und
 Songs, videos, lyrics, comments and artwork belong to their rights holders and are not licensed by this repository. VocaWiki attribution and history links are preserved; images and quotations may have separate licenses.
 
 Redistributors must preserve required dependency notices and comply with the licenses of bundled components. Credentials, account snapshots, local libraries and private QA screenshots are excluded from this source release.
+# Calendar data and artwork
+
+The calendar queries date-specific public records from https://vocabirth.melodynade.com/ (melodynade) on demand. It does not bundle or mirror the dataset. Result cards retain source attribution and niconico links. Singer reference dates and artwork are linked to their VocaWiki entries; birthdays and release anniversaries are labelled separately. Online artwork and song records retain their original rights. User-uploaded portraits stay in local preferences and are not included in the source or releases.
