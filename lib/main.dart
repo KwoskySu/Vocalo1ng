@@ -744,7 +744,7 @@ class _ShelfHomeState extends State<ShelfHome> {
           ),
         const SizedBox(height: 20),
         const Text(
-          'LOCAL FIRST / v0.3',
+          'Vocalo1ng / v$appVersion',
           style: TextStyle(fontSize: 9, color: muted),
         ),
       ],

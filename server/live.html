@@ -12,4 +12,15 @@
 #tools{display:none;position:fixed;right:8px;top:8px;z-index:2;background:#151923bb;color:white;border:1px solid #ffffff55;border-radius:9px;padding:8px;font:12px system-ui}
 .interactive #tools{display:block}.interactive #widget{position:absolute;resize:both;overflow:auto;min-width:220px;min-height:100px;max-width:100vw;max-height:100vh;cursor:move;touch-action:none}.interactive.locked #widget{resize:none;cursor:default;touch-action:auto}
 @media(max-width:600px){#widget{gap:12px;padding:16px}#cover{width:70px;height:70px}#line{font-size:min(1em,8vw)}}
+
+#widget{isolation:isolate;position:relative}#widget #cover{width:min(var(--cover-size,160px),35vw);height:min(var(--cover-size,160px),35vw);flex-shrink:0}
+#widget #translation{font-size:calc(1em * var(--translation-scale,.57))}#widget #title{font-size:calc(1em * var(--title-scale,.55))}
+#widget.shape0 #cover{border-radius:18px;animation:none;transform:none}#widget.shape1 #cover{border-radius:50%;animation:none;transform:none}#widget.shape2 #cover{border-radius:0;animation:none;transform:none}
+#widget.shape3 #cover{border-radius:50%;animation:spin 20s linear infinite;border:12px solid #151820}#widget.shape3.paused #cover{animation-play-state:paused}#widget.shape4 #cover{border-radius:6px;transform:rotate(-7deg);animation:none;box-shadow:8px 8px 0 #ffffff30}
+#widget::before{content:'';position:absolute;inset:0;z-index:-1;border-radius:inherit;opacity:var(--opacity);pointer-events:none}#widget.bg0{background:transparent!important}#widget.bg1::before{background:#101724}#widget.bg2::before{background:linear-gradient(120deg,#152d47,#4d2648)}
+#widget.bg3::before{background:radial-gradient(ellipse at 20% 10%,#316d85,transparent 65%),radial-gradient(ellipse at 80% 80%,#7d487b,#102038);background-size:160% 160%;animation:aurora 16s ease-in-out infinite alternate}
+#widget.bg4::before{background-color:#111827;background-image:linear-gradient(#ffffff15 1px,transparent 1px),linear-gradient(90deg,#ffffff15 1px,transparent 1px);background-size:24px 24px}
+#widget.bg5::before{background-image:linear-gradient(#10162199,#101621bb),var(--cover-bg);background-size:cover;background-position:center;filter:blur(14px);transform:scale(1.04)}
+#widget.fx1 #line{text-shadow:2px 3px 3px #000}#widget.fx2 #line{-webkit-text-stroke:1px var(--ink);text-shadow:2px 2px #000}#widget.fx3 #line{text-shadow:0 0 8px var(--ink),0 0 24px var(--ink)}#widget.fx4 #line{letter-spacing:.12em}
+@keyframes aurora{to{background-position:100% 80%,0 30%}}
 </style></head><body><button id="tools" type="button">锁定位置</button><section id="widget" hidden><img id="cover" alt=""><div id="body"><div id="title"></div><div id="artist"></div><div id="previous"></div><div id="line"></div><div id="translation"></div><div id="next"></div><div id="bar"><div id="progress"></div></div><div id="time"></div></div></section><script src="/live.js"></script></body></html>

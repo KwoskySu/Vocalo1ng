@@ -5,7 +5,21 @@ import 'package:flutter/services.dart';
 bool playerFullscreenActive = false;
 final _changes = StreamController<bool>.broadcast();
 Stream<bool> get playerFullscreenChanges => _changes.stream;
-Future<void> setPlayerFullscreen(bool enabled) async {
+Future<void>? _transition;
+bool _desired = false;
+Future<void> setPlayerFullscreen(bool enabled) {
+  _desired = enabled;
+  return _transition ??= Future<void>.microtask(() async {
+    while (_desired != playerFullscreenActive) {
+      final target = _desired;
+      await _applyFullscreen(target);
+      playerFullscreenActive = target;
+      _changes.add(target);
+    }
+  }).whenComplete(() => _transition = null);
+}
+
+Future<void> _applyFullscreen(bool enabled) async {
   if (Platform.isAndroid) {
     await const MethodChannel(
       'vocalo1ng/runtime',
@@ -21,6 +35,4 @@ Future<void> setPlayerFullscreen(bool enabled) async {
   } else {
     throw UnsupportedError('此平台暂未提供窗口全屏');
   }
-  playerFullscreenActive = enabled;
-  _changes.add(enabled);
 }

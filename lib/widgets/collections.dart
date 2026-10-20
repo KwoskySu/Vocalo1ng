@@ -153,7 +153,7 @@ class CollectionsPage extends StatelessWidget {
         const TabBar(
           tabs: [
             Tab(text: '歌曲收藏'),
-            Tab(text: '百科'),
+            Tab(text: '百科收藏'),
             Tab(text: '评论收藏'),
           ],
         ),

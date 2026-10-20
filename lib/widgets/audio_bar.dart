@@ -1,3 +1,4 @@
+import 'audio_visualizer.dart';
 import 'phone_theme.dart';
 import 'package:file_selector/file_selector.dart';
 import 'desktop_mode.dart';
@@ -230,6 +231,13 @@ class AudioBar extends StatelessWidget {
       final actions = Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          IconButton(
+            tooltip: '音频可视化 · 自动全屏',
+            onPressed: active
+                ? () => showAudioVisualizer(context, playback)
+                : null,
+            icon: const Icon(Icons.graphic_eq),
+          ),
           if (t != null)
             IconButton(
               tooltip: '刷新当前歌曲播放地址',
@@ -243,12 +251,7 @@ class AudioBar extends StatelessWidget {
             onPressed: () => showLiveMode(context, playback),
             icon: const Icon(Icons.sensors),
           ),
-          if (desktopModeSupported)
-            IconButton(
-              tooltip: '桌面模式',
-              onPressed: () => showDesktopMode(context, playback),
-              icon: const Icon(Icons.desktop_windows_outlined),
-            ),
+          if (desktopModeSupported) DesktopQuickToggle(playback: playback),
           if (t != null && v.contains('歌词'))
             IconButton(
               tooltip: '歌词',

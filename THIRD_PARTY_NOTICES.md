@@ -20,3 +20,12 @@ Redistributors must preserve required dependency notices and comply with the lic
 # Calendar data and artwork
 
 The calendar queries date-specific public records from https://vocabirth.melodynade.com/ (melodynade) on demand. It does not bundle or mirror the dataset. Result cards retain source attribution and niconico links. Singer reference dates and artwork are linked to their VocaWiki entries; birthdays and release anniversaries are labelled separately. Online artwork and song records retain their original rights. User-uploaded portraits stay in local preferences and are not included in the source or releases.
+
+# Immersive presentation design references
+
+- Folia Major: https://github.com/chthollyphile/folia-major (upstream AGPL-3.0); full-screen lyric spacing and depth concepts.
+- Mineradio: https://github.com/XxHuberrr/Mineradio (upstream GPL-3.0); star-river and cinematic spatial presentation concepts.
+- JIZURA: https://github.com/852wa/JIZURA (upstream MIT); authored typography and lyric-PV composition concepts.
+- Catbot3 Audio Visualizer: https://catbot-3.com/pages/tools/audio-visualizer/ ; cover / metadata / spectrum presentation reference.
+
+Vocalo1ng 0.4.16 independently implements its scene renderer and PCM analysis. No source, Three.js runtime, models, shaders, fonts, artwork, or compiled assets from these references are bundled. Design references are credited here; independently named scenes do not imply compatibility with their project files, renderers, expression packs or export pipelines. Animation follows existing line timestamps; no word-level or intelligent beat timing is invented.

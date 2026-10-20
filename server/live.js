@@ -10,11 +10,14 @@ async function update() {
     widget.hidden = false;
     widget.style.opacity = s.offline || (s.hide && !s.playing) ? '0' : '1';
     if (s.offline) return;
-    widget.className = `mode${s.mode} ${s.playing?'':'paused'}`;
+    widget.className = `mode${s.mode} shape${s.coverShape||0} bg${s.backgroundStyle||0} fx${s.textEffect||0} ${s.playing?'':'paused'}`;
     for (const key of ['title','artist','line','translation','next','previous']) document.getElementById(key).textContent = s[key] || '';
     document.querySelector('#translation').hidden = !s.translationVisible;
     if (cover !== s.cover) {cover = s.cover; document.querySelector('#cover').src = cover ? '/api/image?'+new URLSearchParams({url:cover}) : '';}
-    widget.style.setProperty('--size',s.size+'px');widget.style.setProperty('--ink',s.color);widget.style.setProperty('--opacity',s.opacity);widget.style.setProperty('--align',s.align);widget.style.fontFamily=s.font;
+    widget.style.setProperty('--size',s.size+'px');widget.style.setProperty('--ink',s.color);widget.style.setProperty('--opacity',s.opacity);widget.style.setProperty('--align',s.align);widget.style.fontFamily=({'sans-serif':'Microsoft YaHei, sans-serif',serif:'Noto Serif SC, SimSun, serif',monospace:'Cascadia Code, monospace',cursive:'KaiTi, STKaiti, cursive',display:'Impact, Microsoft YaHei, sans-serif',rounded:'Segoe UI, Microsoft YaHei, sans-serif'})[s.font]||'sans-serif';
+    widget.style.setProperty('--cover-size',(s.coverSize||160)+'px');widget.style.setProperty('--translation-scale',s.translationScale||.57);widget.style.setProperty('--title-scale',s.titleScale||.55);
+    document.querySelector('#cover').style.display=s.coverVisible?'block':'none';
+    widget.style.setProperty('--cover-bg',cover?'url("/api/image?'+new URLSearchParams({url:cover})+'")':'none');
     document.querySelector('#progress').style.width = Math.min(100,s.duration?s.position/s.duration*100:0)+'%';
     document.querySelector('#time').textContent = `${time(s.position)} / ${time(s.duration)}`;
   } catch {widget.style.opacity='0';}

@@ -19,6 +19,11 @@ class MainActivity : FlutterActivity() {
     }
     private var pendingQr: ByteArray? = null
     private var pendingResult: MethodChannel.Result? = null
+    private var audioAnalyzer: SongAudioAnalyzer? = null
+    override fun cleanUpFlutterEngine(engine: FlutterEngine) {
+        audioAnalyzer?.close(); audioAnalyzer = null
+        super.cleanUpFlutterEngine(engine)
+    }
     private var runtimeChannel: MethodChannel? = null
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,10 +34,17 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(engine: FlutterEngine) {
         super.configureFlutterEngine(engine)
+        audioAnalyzer = SongAudioAnalyzer(this, engine.dartExecutor.binaryMessenger)
         runtimeChannel = MethodChannel(engine.dartExecutor.binaryMessenger, "vocalo1ng/runtime")
         PlaybackTransport.channel = runtimeChannel
         runtimeChannel!!.setMethodCallHandler { call, result ->
                 when (call.method) {
+                    "notificationSettings" -> {
+                        startActivity(Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                            putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, packageName)
+                        })
+                        result.success(true)
+                    }
                     "fullscreen" -> {
                         val enabled = call.arguments == true
                         if (Build.VERSION.SDK_INT >= 30) {
@@ -85,8 +97,12 @@ class MainActivity : FlutterActivity() {
                             putExtra("buffered", (args["buffered"] as? Number)?.toLong() ?: 0)
                             putExtra("queue", org.json.JSONArray(args["queue"] as? List<*> ?: emptyList<Any>()).toString())
                         }
-                        if (playing && Build.VERSION.SDK_INT >= 26) startForegroundService(update) else startService(update)
-                        result.success(true)
+                        try {
+                            if (playing && Build.VERSION.SDK_INT >= 26) startForegroundService(update) else startService(update)
+                            result.success(true)
+                        } catch (error: RuntimeException) {
+                            result.error("playback_notification", "无法更新系统媒体通知：${error.javaClass.simpleName}", null)
+                        }
                     }
                     "saveQr" -> {
                         try {
@@ -169,6 +185,10 @@ class MainActivity : FlutterActivity() {
             startService(Intent(this, GatewayService::class.java))
             runtimeChannel?.invokeMethod("refreshPlayback",null)
         }
+    }
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1902) runtimeChannel?.invokeMethod("refreshPlayback", null)
     }
     @Deprecated("Android activity result bridge")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

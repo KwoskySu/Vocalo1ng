@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vocashelf/services/app_info.dart';
@@ -6,6 +7,33 @@ import 'package:vocashelf/services/player_fullscreen.dart';
 import 'package:vocashelf/widgets/about.dart';
 
 void main() {
+  testWidgets(
+    'exiting while fullscreen entry is pending restores state after the in-flight request',
+    (tester) async {
+      final gate = Completer<void>();
+      final calls = <bool>[];
+      const channel = MethodChannel('vocalo1ng/window');
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (
+        call,
+      ) async {
+        calls.add(call.arguments as bool);
+        if (call.arguments == true) await gate.future;
+        return true;
+      });
+      final enter = setPlayerFullscreen(true);
+      await tester.pump();
+      final exit = setPlayerFullscreen(false);
+      gate.complete();
+      await tester.pump();
+      await Future.wait([enter, exit]);
+      expect(calls, [true, false]);
+      expect(playerFullscreenActive, isFalse);
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        channel,
+        null,
+      );
+    },
+  );
   testWidgets(
     'about page fits phone portrait and landscape and includes project actions',
     (tester) async {

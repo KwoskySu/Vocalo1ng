@@ -36,6 +36,15 @@ test('live publication scopes owners, validates fields, expires and stops withou
   const a=store.publish('private-session',{title:'test',cover:'file:///secret',mode:900,color:'bad',size:999});
   assert.equal(store.read(a.token).cover,'');assert.equal(store.read(a.token).size,64);
   assert.ok(!JSON.stringify(store.read(a.token)).includes('private-session'));
+  store.publish('private-session',{font:'serif',coverSize:220,coverShape:4,backgroundStyle:5,textEffect:3,translationScale:.7,titleScale:.8,coverVisible:false});
+  const styled=store.read(a.token);
+  assert.equal(styled.font,'serif');assert.equal(styled.coverSize,220);assert.equal(styled.coverVisible,false);
+  assert.equal(styled.coverShape,4);assert.equal(styled.backgroundStyle,5);assert.equal(styled.textEffect,3);
+  assert.equal(styled.translationScale,.7);assert.equal(styled.titleScale,.8);
+  store.publish('private-session',{font:'url(secret)',coverSize:9999,coverShape:-1,backgroundStyle:99,textEffect:99});
+  const bounded=store.read(a.token);
+  assert.equal(bounded.font,'sans-serif');assert.equal(bounded.coverSize,260);
+  assert.equal(bounded.coverShape,0);assert.equal(bounded.backgroundStyle,5);assert.equal(bounded.textEffect,4);
   const b=store.publish('other',{});store.stop('private-session');assert.equal(store.read(a.token).offline,true);assert.equal(store.read(b.token).offline,undefined);
   now=16000;assert.equal(store.read(b.token).offline,true);
 });

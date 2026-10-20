@@ -20,7 +20,14 @@ export class LiveStore {
       opacity: Math.max(0, Math.min(1, Number(input.opacity) || 0)), hide: input.hide === true,
       align: ['left','center','right'].includes(input.align) ? input.align : 'center',
       color: /^#[a-f\d]{6}$/i.test(input.color) ? input.color : '#ffffff',
-      font: ['sans-serif','serif','monospace'].includes(input.font) ? input.font : 'sans-serif', translationVisible: input.translationVisible !== false};
+      coverSize: Math.max(40, Math.min(260, Number(input.coverSize) || 160)),
+      coverShape: Math.max(0, Math.min(4, Math.floor(Number(input.coverShape) || 0))),
+      backgroundStyle: Math.max(0, Math.min(5, Math.floor(Number(input.backgroundStyle) || 0))),
+      translationScale: Math.max(.3, Math.min(1, Number(input.translationScale) || .57)),
+      titleScale: Math.max(.3, Math.min(1, Number(input.titleScale) || .55)),
+      textEffect: Math.max(0, Math.min(4, Math.floor(Number(input.textEffect) || 0))),
+      coverVisible: input.coverVisible !== false,
+      font: ['sans-serif','serif','monospace','cursive','display','rounded'].includes(input.font) ? input.font : 'sans-serif', translationVisible: input.translationVisible !== false};
     item.updated = this.now();
     return {token: item.token, path: `/live.html?token=${item.token}`};
   }

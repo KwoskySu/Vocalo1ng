@@ -125,6 +125,7 @@ class Playback extends ChangeNotifier {
   String? _androidSourceId;
   late final StreamSubscription<Duration> durationSubscription;
   late final StreamSubscription<bool> bufferingSubscription;
+  String? analysisSource;
   String quality = 'standard';
   Future<void> setQuality(String value) async {
     final track = current;
@@ -139,6 +140,7 @@ class Playback extends ChangeNotifier {
       final source = await music.stream(track.id, quality: value);
       if (request != generation) return;
       await player.open(Media(source.url, httpHeaders: music.nativeHeaders));
+      if (request == generation) analysisSource = source.url;
       await player.seek(at);
       if (!wasPlaying) await player.pause();
       quality = value;
@@ -186,6 +188,7 @@ class Playback extends ChangeNotifier {
     final request = ++generation;
     final requestedQuality = current?.id == track.id ? quality : 'standard';
     current = track;
+    analysisSource = null;
     _androidSourceId = null;
     // A successful quality selection for another song is not an entitlement for
     // this song or provider. New songs begin at the universally requested level.
@@ -213,6 +216,7 @@ class Playback extends ChangeNotifier {
       if (request != generation) return;
       preview = source.preview;
       await player.open(Media(source.url, httpHeaders: music.nativeHeaders));
+      if (request == generation) analysisSource = source.url;
       if (request == generation) {
         _androidSourceId = track.id;
         await syncAndroid();
@@ -240,6 +244,8 @@ class Playback extends ChangeNotifier {
     notifyListeners();
     try {
       await player.open(Media(uri));
+      analysisSource = uri;
+      notifyListeners();
     } catch (_) {
       error = '无法播放该音频文件';
       notifyListeners();

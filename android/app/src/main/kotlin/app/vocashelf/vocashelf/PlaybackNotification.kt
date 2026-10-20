@@ -38,7 +38,7 @@ class PlaybackNotification(private val service: Service) {
         override fun run() {
             if (!closed && state?.getBooleanExtra("playing", false) == true) {
                 // Keep the visible progress card current as well as MediaSession.
-                render()
+                if (Build.VERSION.SDK_INT >= 33) refreshProgress() else render()
                 handler.postDelayed(this, 1000)
             }
         }
@@ -139,11 +139,12 @@ class PlaybackNotification(private val service: Service) {
         val legacy = Build.VERSION.SDK_INT < 29
         // SystemUI rebuilds styled RemoteViews. Plain MediaStyle discards a
         // custom progress panel during that rebuild; DecoratedMedia preserves it.
-        val style = Notification.DecoratedMediaCustomViewStyle()
+        val modern = Build.VERSION.SDK_INT >= 33
+        val style = if (modern) Notification.MediaStyle() else Notification.DecoratedMediaCustomViewStyle()
         style.setMediaSession(session.sessionToken)
         if(legacy) style.setShowActionsInCompactView(1,2,3) else style.setShowActionsInCompactView(0,1,2)
         builder.setProgress(1000,progress,false).setShowWhen(false)
-        run {
+        if (!modern) {
             val views=RemoteViews(service.packageName,R.layout.playback_notification)
             views.setTextViewText(R.id.track_title,title)
             views.setTextViewText(R.id.track_artist,artist)
@@ -162,6 +163,10 @@ class PlaybackNotification(private val service: Service) {
             builder.setCustomContentView(compact)
         }
         builder.setColor(accent)
+        if (modern) cover?.let { builder.setLargeIcon(it) }
+        if (Build.VERSION.SDK_INT >= 31) {
+            builder.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
+        }
         if(Build.VERSION.SDK_INT>=26) builder.setColorized(false)
         // Legacy MediaStyle turns largeIcon into a huge decorative right panel.
         // Our own thumbnail remains in the progress panel; lockscreen/session
@@ -180,7 +185,9 @@ class PlaybackNotification(private val service: Service) {
         if(legacy) builder.addAction(Notification.Action.Builder(R.drawable.notification_forward,"前进10秒",control("seek:${(position+10000).coerceAtMost(if(duration>0)duration else Long.MAX_VALUE)}")).build())
         val notification = builder.setStyle(style).build()
         if (playing) {
-            service.startForeground(401, notification)
+            if (Build.VERSION.SDK_INT >= 29) {
+                service.startForeground(401, notification, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
+            } else service.startForeground(401, notification)
             if(!wake.isHeld) wake.acquire()
         } else {
             if(wake.isHeld) wake.release()

@@ -6,6 +6,7 @@
 #include "flutter/generated_plugin_registrant.h"
 #include "floating_window.h"
 #include "desktop_window.h"
+#include "audio_analysis.h"
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
@@ -30,6 +31,7 @@ bool FlutterWindow::OnCreate() {
   RegisterPlugins(flutter_controller_->engine());
   RegisterFloatingWindow(flutter_controller_->engine()->messenger());
   RegisterDesktopWindow(flutter_controller_->engine()->messenger());
+  RegisterAudioAnalysis(flutter_controller_->engine()->messenger());
   window_channel_ = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
       flutter_controller_->engine()->messenger(), "vocalo1ng/window",
       &flutter::StandardMethodCodec::GetInstance());
@@ -57,6 +59,7 @@ void FlutterWindow::OnDestroy() {
   window_channel_.reset();
   CloseFloatingWindow();
   CloseDesktopWindow();
+  CloseAudioAnalysis();
   if (flutter_controller_) {
     flutter_controller_ = nullptr;
   }

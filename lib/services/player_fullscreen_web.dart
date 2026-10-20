@@ -17,7 +17,18 @@ final StreamController<bool> _changes = StreamController<bool>.broadcast(
   },
 );
 Stream<bool> get playerFullscreenChanges => _changes.stream;
-Future<void> setPlayerFullscreen(bool enabled) async {
+Future<void>? _transition;
+bool _desired = false;
+Future<void> setPlayerFullscreen(bool enabled) {
+  _desired = enabled;
+  return _transition ??= Future<void>.microtask(() async {
+    while (_desired != playerFullscreenActive) {
+      await _applyFullscreen(_desired);
+    }
+  }).whenComplete(() => _transition = null);
+}
+
+Future<void> _applyFullscreen(bool enabled) async {
   if (enabled && !playerFullscreenActive) {
     await web.document.documentElement!.requestFullscreen().toDart;
   } else if (!enabled && playerFullscreenActive) {

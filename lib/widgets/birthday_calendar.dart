@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:file_selector/file_selector.dart';
@@ -25,7 +27,7 @@ class _BirthdayCalendarState extends State<BirthdayCalendar>
   late DateTime date, month;
   Timer? timer;
   List<Map<String, dynamic>> items = [];
-  int limit = 24, revision = 0;
+  int limit = 24, revision = 0, currentCard = 0;
   bool loading = false;
   String? error;
   @override
@@ -393,7 +395,10 @@ class _BirthdayCalendarState extends State<BirthdayCalendar>
                                   children: [
                                     Text(
                                       '$day',
+                                      maxLines: 1,
+                                      softWrap: false,
                                       style: TextStyle(
+                                        fontSize: 13,
                                         fontWeight: singers.isEmpty
                                             ? null
                                             : FontWeight.bold,
@@ -429,6 +434,144 @@ class _BirthdayCalendarState extends State<BirthdayCalendar>
     );
   }
 
+  void moveCard(int delta, int count) {
+    if (count < 2 || !cards.hasClients) return;
+    final next =
+        (((cards.page ?? currentCard.toDouble()).round() + delta) % count +
+            count) %
+        count;
+    cards.animateToPage(
+      next,
+      duration: const Duration(milliseconds: 380),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  Widget birthdayDeck(List<SingerBirthday> selected, bool wide) {
+    if (selected.isEmpty) {
+      return SizedBox(
+        height: wide ? null : 190,
+        child: Card(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.cake_outlined, size: 36),
+                  const SizedBox(height: 10),
+                  const Text('从下方选择喜欢的歌手'),
+                  Text(
+                    '生日与首发纪念日会显示在右侧日历中',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    return Focus(
+      autofocus: true,
+      onKeyEvent: (_, event) {
+        if (event is KeyDownEvent &&
+            [
+              LogicalKeyboardKey.arrowLeft,
+              LogicalKeyboardKey.arrowRight,
+            ].contains(event.logicalKey)) {
+          moveCard(
+            event.logicalKey == LogicalKeyboardKey.arrowLeft ? -1 : 1,
+            selected.length,
+          );
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      },
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '下一次心动的日子',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              IconButton(
+                tooltip: '上一位歌手',
+                onPressed: selected.length > 1
+                    ? () => moveCard(-1, selected.length)
+                    : null,
+                icon: const Icon(Icons.chevron_left),
+              ),
+              Text(
+                '${currentCard.clamp(0, selected.length - 1) + 1} / ${selected.length}',
+              ),
+              IconButton(
+                tooltip: '下一位歌手',
+                onPressed: selected.length > 1
+                    ? () => moveCard(1, selected.length)
+                    : null,
+                icon: const Icon(Icons.chevron_right),
+              ),
+            ],
+          ),
+          SizedBox(
+            height: wide ? 306 : 278,
+            child: ScrollConfiguration(
+              behavior: ScrollConfiguration.of(context).copyWith(
+                dragDevices: {
+                  PointerDeviceKind.mouse,
+                  PointerDeviceKind.touch,
+                  PointerDeviceKind.trackpad,
+                  PointerDeviceKind.stylus,
+                },
+              ),
+              child: PageView.builder(
+                controller: cards,
+                itemCount: selected.length,
+                clipBehavior: Clip.none,
+                onPageChanged: (i) => setState(() => currentCard = i),
+                itemBuilder: (context, i) => AnimatedBuilder(
+                  animation: cards,
+                  child: countdown(selected[i]),
+                  builder: (context, child) {
+                    final page =
+                        cards.hasClients && cards.position.hasContentDimensions
+                        ? cards.page ?? 0
+                        : 0.0;
+                    final d = (page - i).clamp(-1.0, 1.0);
+                    return Transform.translate(
+                      offset: Offset(0, d.abs() * 7),
+                      child: Transform.rotate(
+                        angle: d * .018,
+                        child: Transform.scale(
+                          scale: 1 - d.abs() * .05,
+                          child: child,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+          if (selected.length > 1)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                '拖动卡片 / 点击箭头 / 使用键盘 ← →',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: prefs,
@@ -449,70 +592,51 @@ class _BirthdayCalendarState extends State<BirthdayCalendar>
             const SizedBox(height: 8),
             const Text('选择角色显示倒计时，多选后左右滑动。日期来自 VocaWiki，角色生日与声库首发纪念日已分别注明。'),
             const SizedBox(height: 10),
-            Wrap(
-              spacing: 6,
-              runSpacing: 2,
-              children: [
-                for (final s in singerBirthdays)
-                  FilterChip(
-                    label: Text('${s.name} ${s.month}/${s.day}'),
-                    selected: prefs.selected.contains(s.id),
-                    avatar: CircleAvatar(
-                      backgroundColor: Color(s.color),
-                      radius: 5,
-                    ),
-                    onSelected: (_) => prefs.toggle(s.id),
-                  ),
-              ],
-            ),
-            if (selected.isNotEmpty)
+            if (constraints.maxWidth >= 1000)
               SizedBox(
-                height: constraints.maxWidth < 600 ? 270 : 300,
-                child: PageView.builder(
-                  controller: cards,
-                  itemCount: selected.length,
-                  clipBehavior: Clip.none,
-                  itemBuilder: (context, i) => AnimatedBuilder(
-                    animation: cards,
-                    child: countdown(selected[i]),
-                    builder: (context, child) {
-                      final page =
-                          cards.hasClients &&
-                              cards.position.hasContentDimensions
-                          ? cards.page ?? 0
-                          : 0.0;
-                      final distance = (page - i).clamp(-1.0, 1.0);
-                      return Transform.translate(
-                        offset: Offset(0, distance.abs() * 8),
-                        child: Transform.rotate(
-                          angle: distance * .025,
-                          child: Transform.scale(
-                            scale: 1 - distance.abs() * .06,
-                            child: child,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                height: 390,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(flex: 8, child: birthdayDeck(selected, true)),
+                    const SizedBox(width: 14),
+                    Expanded(flex: 5, child: monthCalendar()),
+                  ],
                 ),
-              ),
-            if (selected.length > 1)
-              Text(
-                '已选 ${selected.length} 位 · 左右滑动查看',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            if (constraints.maxWidth >= 720)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: SizedBox(width: 480, child: monthCalendar()),
               )
-            else
+            else ...[
+              birthdayDeck(selected, false),
               ExpansionTile(
                 title: const Text('查看生日日历'),
                 initiallyExpanded: selected.isEmpty,
                 children: [monthCalendar()],
               ),
+            ],
+            const SizedBox(height: 10),
+            ExpansionTile(
+              tilePadding: const EdgeInsets.symmetric(horizontal: 4),
+              title: Text('选择提醒角色 · 已选 ${selected.length} 位'),
+              initiallyExpanded: selected.isEmpty,
+              children: [
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
+                    for (final s in singerBirthdays)
+                      FilterChip(
+                        label: Text('${s.name} ${s.month}/${s.day}'),
+                        selected: prefs.selected.contains(s.id),
+                        avatar: CircleAvatar(
+                          backgroundColor: Color(s.color),
+                          radius: 5,
+                        ),
+                        onSelected: (_) => prefs.toggle(s.id),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+              ],
+            ),
             const SizedBox(height: 18),
             Row(
               children: [

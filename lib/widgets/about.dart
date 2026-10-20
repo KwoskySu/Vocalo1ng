@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import '../services/app_info.dart';
 import 'song_detail.dart';
 import 'brand_mark.dart';
@@ -32,6 +34,32 @@ class AboutVocalo1ng extends StatelessWidget {
                   Card(
                     child: Column(
                       children: [
+                        if (!kIsWeb &&
+                            defaultTargetPlatform == TargetPlatform.android)
+                          ListTile(
+                            leading: const Icon(Icons.notifications_outlined),
+                            title: const Text('播放通知设置'),
+                            subtitle: const Text(
+                              '通知被关闭时可在系统设置中恢复；媒体控制也可能位于快捷设置中',
+                            ),
+                            onTap: () async {
+                              try {
+                                await const MethodChannel(
+                                  'vocalo1ng/runtime',
+                                ).invokeMethod('notificationSettings');
+                              } catch (_) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        '请在系统应用设置中打开 Vocalo1ng 的通知',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                          ),
                         ListTile(
                           leading: const Icon(Icons.code),
                           title: const Text('GitHub 开源项目'),
@@ -62,6 +90,16 @@ class AboutVocalo1ng extends StatelessWidget {
                           onTap: () => openSource(
                             context,
                             Uri.parse('$projectUrl/blob/main/LICENSE'),
+                          ),
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.theater_comedy_outlined),
+                          title: const Text('沉浸展示设计参考'),
+                          onTap: () => openSource(
+                            context,
+                            Uri.parse(
+                              'https://github.com/chthollyphile/folia-major',
+                            ),
                           ),
                         ),
                         ListTile(

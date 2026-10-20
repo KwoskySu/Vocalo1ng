@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -47,7 +48,7 @@ void main() {
           home: Scaffold(body: CollectionsPage(playback: null)),
         ),
       );
-      await tester.tap(find.text('百科'));
+      await tester.tap(find.text('百科收藏'));
       await tester.pumpAndSettle();
       expect(find.text('保留的百科'), findsOneWidget);
       await tester.tap(find.text('评论收藏'));
@@ -63,7 +64,11 @@ void main() {
     (tester) async {
       final pixel =
           'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLbtAAAAABJRU5ErkJggg==';
-      for (final size in [const Size(320, 700), const Size(800, 360)]) {
+      for (final size in [
+        const Size(320, 700),
+        const Size(800, 360),
+        const Size(1280, 800),
+      ]) {
         SharedPreferences.setMockInitialValues({
           'birthdays.selected': ['miku', 'kaito'],
           'birthdays.images': jsonEncode({'miku': pixel, 'kaito': pixel}),
@@ -110,7 +115,31 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.byType(PageView), findsOneWidget);
         expect(find.textContaining('初音未来'), findsWidgets);
-        expect(tester.takeException(), isNull);
+        if (size.width >= 1000) {
+          await tester.ensureVisible(find.byTooltip('下一位歌手'));
+          await tester.pumpAndSettle();
+          final page = tester
+              .widget<PageView>(find.byType(PageView))
+              .controller!;
+          final deck = tester.getRect(find.byType(PageView));
+          final calendar = tester.getRect(find.byTooltip('上个月'));
+          expect((deck.top - calendar.top).abs(), lessThan(80));
+          await tester.tap(find.byTooltip('下一位歌手'));
+          await tester.pumpAndSettle();
+          expect(page.page, closeTo(1, .01));
+          final drag = await tester.startGesture(
+            tester.getCenter(find.byType(PageView)),
+            kind: PointerDeviceKind.mouse,
+          );
+          await drag.moveBy(
+            const Offset(480, 0),
+            timeStamp: const Duration(milliseconds: 450),
+          );
+          await drag.up();
+          await tester.pumpAndSettle();
+          expect(page.page, closeTo(0, .01));
+        }
+        expect(tester.takeException(), isNull, reason: '$size');
         await tester.pumpWidget(const SizedBox());
         music.dispose();
       }
