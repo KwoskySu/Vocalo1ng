@@ -84,7 +84,7 @@ void main() {
           Icons.favorite_outline,
           Icons.menu_book_outlined,
           Icons.cake_outlined,
-          Icons.tune_rounded,
+          Icons.emoji_events_outlined,
         ]) {
           final nav = find.byType(NavigationBar);
           await tester.tap(
@@ -99,6 +99,12 @@ void main() {
             reason: 'navigation $icon $size',
           );
         }
+        await tester.tap(find.byTooltip('设置'));
+        await tester.pumpAndSettle();
+        expect(find.text('偏好与数据'), findsOneWidget);
+        expect(tester.takeException(), isNull, reason: 'settings $size');
+        await tester.tap(find.byType(CloseButton).last);
+        await tester.pumpAndSettle();
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(

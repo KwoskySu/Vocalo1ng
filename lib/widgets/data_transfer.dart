@@ -7,6 +7,7 @@ import '../services/export.dart';
 import '../services/song_theme.dart';
 import '../services/bar_preferences.dart';
 import '../services/portable_data.dart';
+import '../services/top_charts.dart';
 
 // Account tokens, gateway URLs and device-specific paths are never shared.
 bool _portable(String key) => portableKeys.contains(key);
@@ -28,6 +29,7 @@ class _DataTransferState extends State<DataTransfer> {
     });
     try {
       final prefs = widget.library.preferences;
+      await topCharts.flush();
       if (!importing) {
         final values = {
           for (final key in prefs.getKeys().where(_portable))
@@ -136,6 +138,19 @@ class _DataTransferState extends State<DataTransfer> {
               'wikis': {...?old['wikis'] as Map?, ...?c['wikis'] as Map?},
             });
           }
+          if (entry.key == topChartsKey) {
+            final existing = decodeTopCharts(
+              prefs.getString(topChartsKey) ?? encodeTopCharts([]),
+            );
+            final imported = decodeTopCharts(value as String);
+            value = encodeTopCharts(
+              {
+                for (final c in existing) c.id: c,
+                for (final c in imported) c.id: c,
+              }.values.toList(),
+            );
+            decodeTopCharts(value);
+          }
           final ok = value is String
               ? await prefs.setString(entry.key, value)
               : value is bool
@@ -151,6 +166,7 @@ class _DataTransferState extends State<DataTransfer> {
         await collections.load();
         await songAppearance.load();
         await barPreferences.load();
+        await topCharts.reload();
         if (mounted) setState(() => status = '导入完成。收藏与手记已合并。');
       }
     } catch (error) {

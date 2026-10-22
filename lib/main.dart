@@ -37,6 +37,7 @@ import 'widgets/gateway_settings.dart';
 import 'widgets/journal_workspace.dart';
 import 'services/bar_preferences.dart';
 import 'widgets/data_transfer.dart';
+import 'widgets/top_charts_page.dart';
 import 'services/native_bootstrap_stub.dart'
     if (dart.library.io) 'services/native_bootstrap.dart';
 
@@ -488,7 +489,7 @@ class _ShelfHomeState extends State<ShelfHome> {
                                       (1, Icons.favorite_outline, '收藏'),
                                       (2, Icons.menu_book_outlined, '百科'),
                                       (3, Icons.cake_outlined, '生日日历'),
-                                      (4, Icons.tune_rounded, '设置'),
+                                      (4, Icons.emoji_events_outlined, 'TOP'),
                                     ])
                                       IconButton(
                                         tooltip: label,
@@ -530,7 +531,10 @@ class _ShelfHomeState extends State<ShelfHome> {
                                               BirthdayCalendar(music: music)
                                             else
                                               const SizedBox.shrink(),
-                                            _settings(),
+                                            if (visitedPages.contains(4))
+                                              TopChartsPage(active: page == 4)
+                                            else
+                                              const SizedBox.shrink(),
                                           ],
                                         ),
                                       ),
@@ -600,8 +604,8 @@ class _ShelfHomeState extends State<ShelfHome> {
                           label: '生日',
                         ),
                         NavigationDestination(
-                          icon: Icon(Icons.tune_rounded),
-                          label: '设置',
+                          icon: Icon(Icons.emoji_events_outlined),
+                          label: 'TOP',
                         ),
                       ],
                     ),
@@ -684,7 +688,7 @@ class _ShelfHomeState extends State<ShelfHome> {
           (1, Icons.favorite_outline, '我的收藏'),
           (2, Icons.menu_book_outlined, 'VOCALOID百科'),
           (3, Icons.cake_outlined, '生日日历'),
-          (4, Icons.tune_rounded, '偏好与数据'),
+          (4, Icons.emoji_events_outlined, 'TOP'),
         ])
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
@@ -761,7 +765,7 @@ class _ShelfHomeState extends State<ShelfHome> {
         if (!desktop) ...[const BrandMark(size: 25), const SizedBox(width: 8)],
         Expanded(
           child: Text(
-            ['发现音乐', '我的收藏', 'VOCALOID百科', '生日日历', '偏好与数据'][page],
+            ['发现音乐', '我的收藏', 'VOCALOID百科', '生日日历', 'TOP 榜单工坊'][page],
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
@@ -807,6 +811,28 @@ class _ShelfHomeState extends State<ShelfHome> {
           tooltip: '添加歌曲',
           onPressed: addSong,
           icon: const Icon(Icons.add_circle_outline),
+        ),
+        IconButton(
+          tooltip: '设置',
+          onPressed: () => showDialog<void>(
+            context: context,
+            builder: (context) => AdaptiveDialog(
+              child: SizedBox(
+                width: 820,
+                height: 900,
+                child: Column(
+                  children: [
+                    const ListTile(
+                      title: Text('偏好与数据'),
+                      trailing: CloseButton(),
+                    ),
+                    Expanded(child: _settings()),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          icon: const Icon(Icons.settings_outlined),
         ),
       ],
     ),

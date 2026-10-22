@@ -1,5 +1,5 @@
 const appName = 'Vocalo1ng';
-const appVersion = '0.4.16';
+const appVersion = '0.4.18';
 const projectUrl = 'https://github.com/KwoskySu/Vocalo1ng';
 const projectIssuesUrl = '$projectUrl/issues';
 const projectReleasesUrl = '$projectUrl/releases';

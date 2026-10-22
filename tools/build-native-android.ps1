@@ -12,7 +12,7 @@ $env:PATH = "$env:JAVA_HOME/bin;$env:PATH"
 $env:JAVA_TOOL_OPTIONS = '-Djavax.net.ssl.trustStoreType=Windows-ROOT -Djavax.net.ssl.trustStore=NONE'
 $env:TEMP = 'E:/gpt-vocal/temp'
 $env:TMP = $env:TEMP
-New-Item -ItemType Directory -Force $env:TEMP,$env:ANDROID_USER_HOME,'E:/gpt-vocal/logs','E:/gpt-vocal/releases/0.4.16/Android' | Out-Null
+New-Item -ItemType Directory -Force $env:TEMP,$env:ANDROID_USER_HOME,'E:/gpt-vocal/logs','E:/gpt-vocal/releases/0.4.18/Android' | Out-Null
 & powershell -NoProfile -ExecutionPolicy Bypass -File tools/prepare-android-runtime.ps1
 if ($LASTEXITCODE -ne 0) { throw 'Android runtime preparation failed' }
 # Native Java startup notices on stderr must not make PowerShell 5 abort Flutter.
@@ -25,10 +25,10 @@ if ($vocaBuildExit -eq 0) {
     $ErrorActionPreference = 'Stop'
     if ($SplitPerAbi) {
         foreach ($abi in @('arm64-v8a','armeabi-v7a','x86_64')) {
-            Copy-Item -LiteralPath "build/app/outputs/flutter-apk/app-$abi-release.apk" -Destination "E:/gpt-vocal/releases/0.4.16/Android/Vocalo1ng-0.4.16-$abi.apk" -Force
+            Copy-Item -LiteralPath "build/app/outputs/flutter-apk/app-$abi-release.apk" -Destination "E:/gpt-vocal/releases/0.4.18/Android/Vocalo1ng-0.4.18-$abi.apk" -Force
         }
     } else {
-        Copy-Item -LiteralPath build/app/outputs/flutter-apk/app-release.apk -Destination 'E:/gpt-vocal/releases/0.4.16/Android/Vocalo1ng-0.4.16.apk' -Force
+        Copy-Item -LiteralPath build/app/outputs/flutter-apk/app-release.apk -Destination 'E:/gpt-vocal/releases/0.4.18/Android/Vocalo1ng-0.4.18.apk' -Force
     }
 }
 Set-Content -LiteralPath 'E:/gpt-vocal/logs/android-build.exit' -Value $vocaBuildExit

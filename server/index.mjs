@@ -175,7 +175,7 @@ async function api(req, res, url) {
     res.setHeader('Content-Disposition',`attachment; filename="${id}.${String(data.type).toLowerCase() === 'flac' ? 'flac' : 'mp3'}"`);
     return pipeResponse(await fetchSafe(data.url,{},'audio'),res,'audio');
   }
-  if (route === '/api/health') return send(res, { ok: true, version: '0.4.16', provider: 'personal', lan: bindHost === '0.0.0.0' });
+  if (route === '/api/health') return send(res, { ok: true, version: '0.4.18', provider: 'personal', lan: bindHost === '0.0.0.0' });
   if (session) session.bilibili ??= {};
   if (route === '/api/session' && req.method === 'GET') return send(res, { profile: session.profile, bilibili: session.bilibili.profile ?? null, qq: session.qq.profile ?? null });
   if (route.startsWith('/api/qq/')) {

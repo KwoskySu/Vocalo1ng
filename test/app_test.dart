@@ -28,43 +28,55 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     for (final label in ['乐评卡', '收藏卡']) {
-      await tester.tap(find.text(label));
+      await tester.tap(find.byType(DropdownButton<int>).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(label).last);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     }
   });
-  testWidgets('mobile can collect, filter and add a real user entry', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(390, 844);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    SharedPreferences.setMockInitialValues({});
-    final library = Library(await SharedPreferences.getInstance())..load();
-    await tester.pumpWidget(
-      VocaShelfApp(library: library, showAudio: false, online: false),
-    );
-    await tester.ensureVisible(find.byTooltip('收藏歌曲').first);
-    await tester.tap(find.byTooltip('收藏歌曲').first);
-    await tester.pumpAndSettle();
-    expect(library.songs.first.favorite, isTrue);
-    await tester.tap(find.text('收藏'));
-    await tester.pumpAndSettle();
-    expect(find.text('ワールドイズマイン'), findsOneWidget);
-    expect(find.text('ローリンガール'), findsNothing);
-    await tester.tap(find.byTooltip('添加歌曲'));
-    await tester.pumpAndSettle();
-    final fields = find.byType(TextFormField);
-    await tester.enterText(fields.at(0), '我的测试歌曲');
-    await tester.enterText(fields.at(1), '创作者');
-    await tester.enterText(fields.at(2), '初音未来');
-    await tester.ensureVisible(find.text('添加到曲库'));
-    await tester.tap(find.text('添加到曲库'));
-    await tester.pumpAndSettle();
-    expect(library.songs.first.title, '我的测试歌曲');
-    expect(tester.takeException(), isNull);
-  });
+  testWidgets(
+    'mobile can favorite, search personal notes and add a real user entry',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      SharedPreferences.setMockInitialValues({});
+      final library = Library(await SharedPreferences.getInstance())..load();
+      await tester.pumpWidget(
+        VocaShelfApp(library: library, showAudio: false, online: false),
+      );
+      await tester.ensureVisible(find.byTooltip('收藏歌曲').first);
+      await tester.tap(find.byTooltip('收藏歌曲').first);
+      await tester.pumpAndSettle();
+      expect(library.songs.first.favorite, isTrue);
+      final journalSearch = find.widgetWithText(TextField, '搜索个人手记');
+      await tester.ensureVisible(journalSearch);
+      await tester.enterText(journalSearch, 'ワールドイズマイン');
+      await tester.pumpAndSettle();
+      expect(
+        find
+            .text('ワールドイズマイン', findRichText: false)
+            .evaluate()
+            .where((e) => e.widget is Text)
+            .length,
+        1,
+      );
+      expect(find.text('ローリンガール'), findsNothing);
+      await tester.tap(find.byTooltip('添加歌曲'));
+      await tester.pumpAndSettle();
+      final fields = find.byType(TextFormField);
+      await tester.enterText(fields.at(0), '我的测试歌曲');
+      await tester.enterText(fields.at(1), '创作者');
+      await tester.enterText(fields.at(2), '初音未来');
+      await tester.ensureVisible(find.text('添加到曲库'));
+      await tester.tap(find.text('添加到曲库'));
+      await tester.pumpAndSettle();
+      expect(library.songs.first.title, '我的测试歌曲');
+      expect(tester.takeException(), isNull);
+    },
+  );
   testWidgets('desktop detail saves notes and renders all share templates', (
     tester,
   ) async {
@@ -90,7 +102,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('导出高清 PNG'), findsOneWidget);
     for (final label in ['乐评卡', '收藏卡', '歌词卡']) {
-      await tester.tap(find.text(label));
+      await tester.tap(find.byType(DropdownButton<int>).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(label).last);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     }

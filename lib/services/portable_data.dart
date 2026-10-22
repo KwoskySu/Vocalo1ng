@@ -1,8 +1,10 @@
 import 'dart:convert';
 import '../models/song.dart';
 import '../models/music.dart';
+import 'top_charts.dart';
 
 const portableKeys = {
+  topChartsKey,
   'vocashelf.library.v1',
   'vocalo1ng.collections.v1',
   'vocalo1ng.bar.actions',
@@ -63,6 +65,9 @@ Map<String, dynamic> parsePortableData(String text) {
       }
     } else if (key == 'themeArt') {
       if (value is! String) throw const FormatException('主题格式错误');
+    } else if (key == topChartsKey) {
+      if (value is! String) throw const FormatException('榜单数据格式错误');
+      decodeTopCharts(value);
     } else if (key == 'vocashelf.library.v1') {
       final rows = jsonDecode(value as String) as List;
       if (rows.isEmpty) throw const FormatException('曲库不能为空');
